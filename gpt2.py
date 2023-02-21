@@ -114,6 +114,18 @@ def main(prompt: str, n_tokens_to_generate: int = 40, model_size: str = "124M", 
 
     return output_text
 
+class PicoGPT:
+    def __init__(self, model_size: str = "124M", models_dir: str = "models"):
+        from utils import load_encoder_hparams_and_params
+        self.encoder, self.hparams, self.params = load_encoder_hparams_and_params(model_size, models_dir)
+
+    def __call__(self, prompt: str, n_tokens_to_generate: int = 40, ):
+        encoder, hparams, params = self.encoder, self.hparams, self.params
+        input_ids = encoder.encode(prompt)
+        assert len(input_ids) + n_tokens_to_generate < hparams["n_ctx"]
+        output_ids = generate(input_ids, params, hparams["n_head"], n_tokens_to_generate)
+        output_text = encoder.decode(output_ids)
+        return output_text
 
 if __name__ == "__main__":
     import fire
